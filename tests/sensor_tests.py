@@ -2,8 +2,8 @@ from nose.tools import *
 import math
 from hcsr04sensor.sensor import Measurement
 
-TRIG_PIN = 17
-ECHO_PIN = 27
+TRIG_PIN = 9
+ECHO_PIN = 11
 
 
 def test_measurement():

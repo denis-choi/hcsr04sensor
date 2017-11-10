@@ -69,7 +69,7 @@ class Measurement(object):
         sample = []
         # setup input/output pins
         GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
+        GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.trig_pin, GPIO.OUT)
         GPIO.setup(self.echo_pin, GPIO.IN)
         
@@ -80,14 +80,21 @@ class Measurement(object):
             time.sleep(0.00001)
             GPIO.output(self.trig_pin, False)
             echo_status_counter = 1
+            sonar_signal_off = 0
+            sonar_signal_on = 0
             while GPIO.input(self.echo_pin) == 0:
                 if echo_status_counter < 1000:
                     sonar_signal_off = time.time()
                     echo_status_counter += 1
                 else:
-                    raise SystemError('Echo pulse was not received')
+                    #raise SystemError('Echo pulse was not received')
+                    break
             while GPIO.input(self.echo_pin) == 1:
                 sonar_signal_on = time.time()
+            
+            if sonar_signal_on == 0 or sonar_signal_off == 0:
+                continue
+
             time_passed = sonar_signal_on - sonar_signal_off
             distance_cm = time_passed * ((speed_of_sound * 100) / 2)
             sample.append(distance_cm)
@@ -95,7 +102,7 @@ class Measurement(object):
         # Only cleanup the pins used to prevent clobbering
         # any others in use by the program
         GPIO.cleanup((self.trig_pin, self.echo_pin))
-        return sorted_sample[sample_size // 2]
+        return sorted_sample[len(sorted_sample) // 2]
 
     def depth_metric(self, median_reading, hole_depth):
         '''Calculate the rounded metric depth of a liquid. hole_depth is the
